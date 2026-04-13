@@ -1,7 +1,7 @@
-## Tracing ##
+# Tracing #
 
 
-# OpenSearch
+## OpenSearch
 
 For the opensearch Helm values, see 'opensearch-values.yaml'
 ```
@@ -23,7 +23,7 @@ helm upgrade --install opensearch opensearch/opensearch \
 
 ```
 
-# Jaeger
+## Jaeger
 
 ```
 # Create ns for OpenTel Operator
