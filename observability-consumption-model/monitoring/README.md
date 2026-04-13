@@ -1,6 +1,6 @@
-## Monitoring ##
+# Monitoring #
 
-# Install kube-prometheus-stack
+## Install kube-prometheus-stack
 ```
 # Add the Prometheus Community repo
 helm repo add prometheus-community \
@@ -16,7 +16,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring
 ```
 
-# Optionally, Without Node Exporter
+## Optionally, Without Node Exporter
 ```
 # Create namespace with standard 'baseline' security
 kubectl create ns monitoring
@@ -29,7 +29,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
   --set nodeExporter.enabled=false
 ```
 
-# Verify the Installation
+## Verify the Installation
 ```
 # Show running pods
 kubectl -n monitoring get pods -o custom-columns=NAME:.metadata.name,\
@@ -50,7 +50,7 @@ kubectl get clusterroles -l app.kubernetes.io/instance=prometheus
 kubectl describe clusterrole prometheus-kube-prometheus-prometheus
 ```
 
-# Istio Ingress Gateway with (ADCS) Certificate.
+## Istio Ingress Gateway with (ADCS) Certificate.
 
 For an example of how to setup Active Directory Certificate Services, see 'adcs-example.md'
 
@@ -110,7 +110,7 @@ spec:
 EOF
 ```
 
-# HTTP Routes
+## HTTP Routes
 ```
 kubectl apply -f - <<EOF
 # 1. Grafana Route -> Service Port 80
@@ -179,7 +179,7 @@ spec:
 EOF
 ```
 
-# Verify the Gateway
+## Verify the Gateway
 ```
 # Check for reconciliation and IP 
 kubectl -n istio-ingress get gateway monitoring-gateway
@@ -201,7 +201,7 @@ curl -ik \
   --resolve prometheus.lab:443:$GATEWAY_IP https://prometheus.lab/alertmanager 
 ```
 
-# Deploy Prometheus Example app
+## Deploy Prometheus Example app
 ```
 # Create the application namespace & set permissions
 kubectl create ns my-app
@@ -282,7 +282,7 @@ kubectl run -i --tty load-generator \
 ```
 
 
-# Service Mesh Observability
+## Service Mesh Observability
 ```
 # Ensure Istio system pods are running
 kubectl -n istio-system get pods | grep istio
@@ -340,7 +340,7 @@ kubectl exec -it -n my-app2 debug-sleeper -- \
   echo -n .; sleep 0.1; done"
 ```
 
-# Integration with VCF Operations
+## Integration with VCF Operations
 
 For Telegraf config, see 'telegraf-data-values.yaml'
 ```
@@ -354,7 +354,7 @@ vcf package installed update "$PKG_NAME" \
 ```
 
 
-# Noisy Neighbor Scenario
+## Noisy Neighbor Scenario
 
 For the workload generator, see 'critical-app.yaml'
 

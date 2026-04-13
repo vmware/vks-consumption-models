@@ -1,4 +1,4 @@
-## Observability on VKS ##
+# Observability on VKS
 
 This repository accompanies the **Observability on VKS** white paper:
 <white paper link tbc>

@@ -1,6 +1,6 @@
-## Logging ##
+# Logging #
 
-# Install Loki
+## Install Loki
 
 See the 'loki-values.yaml' for the Loki Helm chart values
 ```
@@ -14,7 +14,7 @@ helm upgrade --install loki grafana/loki \
   --wait --timeout 20m
 ```
 
-# Fluent-bit
+## Fluent-bit
 
 Package reference
 https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vsphere-supervisor-services-and-standalone-components/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/installing-standard-packages-on-tkg-service-clusters/standard-package-reference/fluent-bit-package-reference.html
