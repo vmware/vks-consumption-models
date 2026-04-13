@@ -1,0 +1,33 @@
+# opensearch-values.yaml
+
+global:
+  dockerRegistry: public.ecr.aws
+clusterName: jaeger-traces
+nodeGroup: master
+singleNode: true
+replicas: 1
+extraEnvs:
+  - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+    value: "C0rrugated!Trace#2026"
+opensearchJavaOpts: -Xms1g -Xmx1g
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: '2'
+    memory: 2Gi
+volumeClaimTemplate:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: <your-vsan-storageclass>
+  resources:
+    requests:
+      storage: 100Gi
+service:
+  type: ClusterIP
+sysctlInit:
+  enabled: false
+  image: docker/library/busybox
+persistence:
+  image: docker/library/busybox

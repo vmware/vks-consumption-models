@@ -1,0 +1,63 @@
+# loki-values.yaml
+
+# Define image registry to avoid dockerhub limits 
+global:
+  image:
+    registry: my.internal.registry
+
+# Loki microservices mode
+deploymentMode: Distributed
+
+loki:
+  # Loki authorization is advised in production
+  # Typically via external proxy (OIDC/OAuth2)
+  auth_enabled: false 
+
+  commonConfig:
+    replication_factor: 2  
+
+  storage:
+    # For ‘microservices’ (production) shared
+    # storage, typically an S3 datastore, is required 
+    type: s3
+    bucketNames:
+      chunks: loki-chunks
+      ruler: loki-ruler
+      admin: loki-admin
+    s3:
+      endpoint: http://minio.minio.svc.cluster.local:9000
+      s3ForcePathStyle: true
+      insecure: true
+
+      # Credentials are injected via env vars from a Secret
+      accessKeyId:
+      secretAccessKey:
+
+  limits_config:
+    allow_structured_metadata: true
+    volume_enabled: true
+
+  ruler:
+    enable_api: true
+
+# Inject MinIO credentials into all Loki pods
+extraEnvFrom:
+  - secretRef:
+      name: loki-s3-creds
+
+# Disable non-distributed deployment modes
+singleBinary: { replicas: 0 }
+backend: { replicas: 0 }
+read: { replicas: 0 }
+write: { replicas: 0 }
+
+# Microservice components
+ingester: { replicas: 2, maxUnavailable: 1 }
+querier: { replicas: 2, maxUnavailable: 1 }
+distributor: { replicas: 2, maxUnavailable: 1 }
+queryFrontend: { replicas: 1 }
+queryScheduler: { replicas: 1 }
+indexGateway: { replicas: 1 }
+
+gateway:
+  enabled: true

@@ -1,0 +1,158 @@
+# otel-demo-values.yaml
+
+# OpenTelemetry Demo override values used for the Jaeger tracing demonstration.
+#
+# Purpose:
+# - Disable bundled observability backends
+# - Use external Jaeger deployment as the trace backend
+# - Run OpenTelemetry Collector as a Deployment rather than a
+#   DaemonSet (avoiding hostPath / hostPort requirements)
+# - Enrich telemetry with Kubernetes metadata
+# - Prefix service names with the Kubernetes namespace for clearer Jaeger output
+
+jaeger:
+  enabled: false
+prometheus:
+  enabled: false
+grafana:
+  enabled: false
+opensearch:
+  enabled: false
+
+# Set internal registry mirrors to avoid dockerhub limits
+# replace ‘my.internal.registry’ as appropriate 
+x-images:
+  postgres: &postgres_repo my.internal.registry/postgres
+  valkey: &valkey_repo my.internal.registry/valkey/valkey
+  otelcol: &otelcol_repo my.internal.registry/otel/opentelemetry-collector-contrib
+
+x-otel:
+  trace_processors: &trace_processors
+    - k8sattributes
+    - resource/service_namespace
+    - transform/service_name
+    - memory_limiter
+    - batch
+
+  # Prefix service.name with the Kubernetes namespace
+  service_name_statement: &service_name_statement
+    - set(attributes["service.name"], Concat([attributes["k8s.namespace.name"], attributes["service.name"]], "/")) where not IsMatch(attributes["service.name"], "^.*/.*$")
+
+components:
+  # Disable flagd to simplify the demo and avoid extra non-essential image pulls
+  flagd:
+    enabled: false
+
+  # Override Docker Hub sourced images to use the internal registry
+  postgresql:
+    imageOverride:
+      repository: *postgres_repo
+  valkey-cart:
+    imageOverride:
+      repository: *valkey_repo
+
+opentelemetry-collector:
+  # Use a Deployment rather than a DaemonSet to avoid Pod Security issues
+  mode: deployment
+  replicaCount: 1
+
+  image:
+    repository: *otelcol_repo
+
+  presets:
+    # Keep the collector focused on application OTLP telemetry for the tracing demo
+    hostMetrics:
+      enabled: false
+    kubeletMetrics:
+      enabled: false
+    clusterMetrics:
+      enabled: false
+    kubernetesEvents:
+      enabled: false
+
+  config:
+    receivers:
+      otlp:
+        # Receive OTLP traffic from the demo services over gRPC and HTTP
+        protocols:
+          grpc:
+            endpoint: ${env:MY_POD_IP}:4317
+          http:
+            endpoint: ${env:MY_POD_IP}:4318
+
+    processors:
+      # Enrich telemetry with Kubernetes context for correlation and filtering
+      k8sattributes:
+        auth_type: serviceAccount
+        extract:
+          metadata:
+            - k8s.namespace.name
+            - k8s.pod.name
+            - k8s.pod.uid
+            - k8s.deployment.name
+            - k8s.replicaset.name
+            - k8s.statefulset.name
+            - k8s.node.name
+            - k8s.container.name
+        pod_association:
+          - sources:
+              - from: connection
+
+      # Set a stable service.namespace for the demo environment
+      resource/service_namespace:
+        attributes:
+          - key: service.namespace
+            value: otel-demo
+            action: upsert
+
+      # Rewrite service.name for clearer grouping in Jaeger.
+      transform/service_name:
+        error_mode: ignore
+        trace_statements:
+          - context: resource
+            statements: *service_name_statement
+        metric_statements:
+          - context: resource
+            statements: *service_name_statement
+        log_statements:
+          - context: resource
+            statements: *service_name_statement
+
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+
+      batch: {}
+
+    exporters:
+      # Keep debug output for simple troubleshooting
+      debug: {}
+
+      # Export traces to the external Jaeger deployment in the tracing namespace
+      otlp/jaeger-external:
+        endpoint: jaeger-collector.tracing.svc.cluster.local:4317
+        tls:
+          # Lab setting: insecure transport to the in-cluster Jaeger endpoint
+          insecure: true
+
+    connectors:
+      # Generate span-derived metrics inside the collector
+      spanmetrics: {}
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: *trace_processors
+          exporters: [otlp/jaeger-external, debug, spanmetrics]
+
+        metrics:
+          receivers: [otlp, spanmetrics]
+          processors: *trace_processors
+          exporters: [debug]
+
+        logs:
+          receivers: [otlp]
+          processors: *trace_processors
+          exporters: [debug]

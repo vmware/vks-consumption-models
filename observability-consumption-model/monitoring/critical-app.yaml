@@ -1,0 +1,208 @@
+# critical-app.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: victim-app-script
+  namespace: critical-app
+data:
+  worker.py: |
+    import time
+    import statistics
+    import hashlib
+
+    DATA_PAYLOAD = b"vcf-ops-whitepaper-baseline"
+    THR_MS_MIN = 10.0  # Ignore microscopic CFS quota blips
+
+    def unit_of_work():
+        data = DATA_PAYLOAD
+        for _ in range(10000):
+            data = hashlib.sha256(data).digest()
+        return data
+
+    def get_os_cpu_stats():
+        # /proc/stat columns post-'cpu': 
+        # 0:user, 1:nice, 2:system, 3:idle, 
+        # 4:iowait, 5:irq, 6:softirq, 7:steal
+        try:
+            with open('/proc/stat', 'r') as f:
+                line = f.readline().split()
+                if line[0] == 'cpu':
+                    ticks = [int(x) for x in line[1:]]
+                    if len(ticks) > 7:
+                        return sum(ticks), ticks[7] 
+        except Exception:
+            pass
+        return 0, 0
+
+    def get_cfs_throttle_usec():
+        paths = [
+            "/sys/fs/cgroup/cpu.stat",              # v2
+            "/sys/fs/cgroup/cpu/cpu.stat",          # v1 (common)
+            "/sys/fs/cgroup/cpu,cpuacct/cpu.stat",  # v1 (older)
+        ]
+        for p in paths:
+            try:
+                with open(p, "r") as f:
+                    for line in f:
+                        parts = line.split()
+                        if len(parts) == 2:
+                            k, v = parts[0], parts[1]
+                            if k == "throttled_usec":
+                                return int(v)
+                            elif k == "throttled_time":
+                                return int(v) // 1000
+            except Exception:
+                continue
+        return 0
+
+    # ------------------------------------------------------------
+    # PHASE 1: CALIBRATION
+    # ------------------------------------------------------------
+    print("\n[Phase 1] Calibrating to hardware...", flush=True)
+
+    t_end = time.perf_counter() + 5.0
+    while time.perf_counter() < t_end:
+        unit_of_work()
+
+    sample_times = []
+    t_end = time.perf_counter() + 15.0
+
+    while time.perf_counter() < t_end:
+        t0 = time.perf_counter()
+        unit_of_work()
+        sample_times.append(time.perf_counter() - t0)
+
+    if not sample_times:
+        print("🚨 FATAL: CPU starved. No samples collected.", flush=True)
+        while True:
+            time.sleep(3600)
+
+    median_time = statistics.median(sample_times)
+    batch_size = max(1, int(1.0 / median_time))
+    expected_duration = batch_size * median_time
+    ALERT_THRESHOLD = expected_duration * 1.20
+
+    print("\n[Phase 1 Complete] Hardware Profile Locked:", flush=True)
+    print(f"  - Samples Taken: {len(sample_times)}", flush=True)
+    print(f"  - Baseline:      {expected_duration:.4f}s per batch", flush=True)
+    print(f"  - Alert Trigger: >{ALERT_THRESHOLD:.4f}s", flush=True)
+    print("=" * 76, flush=True)
+    print(flush=True)
+
+    # Header for columnar output (76 chars wide max)
+    hdr = f"{'STAT':<4}| {'UTIL':<10} | {'PERF':<13} | {'DIAGNOSIS':<11} | TELEMETRY"
+    print(hdr, flush=True)
+    print("-" * 76, flush=True)
+    print(f"# base={expected_duration:.2f}s alert={ALERT_THRESHOLD:.2f}s "
+          f"thr_min={THR_MS_MIN:.0f}ms", flush=True)
+
+    # ------------------------------------------------------------
+    # PHASE 2: MONITORING
+    # ------------------------------------------------------------
+    history = [expected_duration] * 3
+
+    while True:
+        start_time = time.perf_counter()
+        start_tot, start_steal = get_os_cpu_stats()
+        start_thr = get_cfs_throttle_usec()
+
+        for _ in range(batch_size):
+            unit_of_work()
+
+        duration = time.perf_counter() - start_time
+        end_tot, end_steal = get_os_cpu_stats()
+        end_thr = get_cfs_throttle_usec()
+        
+        # Clamp deltas at 0 
+        tot_delta = max(0, end_tot - start_tot)
+        steal_delta = max(0, end_steal - start_steal)
+        thr_delta_us = max(0, end_thr - start_thr)
+        thr_delta_ms = thr_delta_us / 1000.0
+
+        steal_pct = 0.0
+        if tot_delta > 0:
+            steal_pct = (steal_delta / tot_delta) * 100.0
+
+        history.pop(0)
+        history.append(duration)
+        rolling_avg = sum(history) / len(history)
+
+        degradation_ratio = rolling_avg / expected_duration
+        bar_len = int(degradation_ratio * 10)
+        bar = "█" * min(bar_len, 10)
+        bar_padded = f"{bar:<10}"
+
+        timing_str = f"{rolling_avg:4.2f}s ({degradation_ratio:4.2f}x)"
+        tel = f"st:{steal_pct:04.1f}% tk:{steal_delta:03d} ms:{thr_delta_ms:03.0f}"
+
+        if rolling_avg > ALERT_THRESHOLD:
+            if steal_delta > 0 and thr_delta_ms >= THR_MS_MIN:
+                diag = "[COMPLEX]"
+            elif steal_delta > 0:
+                diag = "[HV STEAL]"
+            elif thr_delta_ms >= THR_MS_MIN:
+                diag = "[CFS QUOTA]"
+            else:
+                diag = "[UNKNOWN]"
+                
+            out = f"🚨 ER| {bar_padded} | {timing_str:<13} | {diag:<11} | {tel}"
+            print(out, flush=True)
+        else:
+            out = f"✅ OK| {bar_padded} | {timing_str:<13} | {'[HEALTHY]':<11} | {tel}"
+            print(out, flush=True)
+
+        time.sleep(0.1)
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: critical-web-app
+  namespace: critical-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: victim
+  template:
+    metadata:
+      labels:
+        app: victim
+    spec:
+      # Demo-only: Pinning to a specific Kubernetes Node (VM) 
+      # for reproducible contention testing.
+      nodeName: kubernetes-cluster-8py4-kubernetes-cluster-8py4-nodepool-lnb7jx
+    
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: python-worker
+          image: public.ecr.aws/bitnami/python:3.11
+          command: ["python", "-u", "/app/worker.py"]
+          resources:
+            requests:
+              cpu: "1"
+              memory: "128Mi"
+            limits:
+              cpu: "1"
+              memory: "128Mi"
+             
+          volumeMounts:
+            - name: script-volume
+              mountPath: /app
+              readOnly: true
+
+          securityContext:
+            runAsUser: 1001
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+
+      volumes:
+        - name: script-volume
+          configMap:
+            name: victim-app-script
