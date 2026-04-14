@@ -4,7 +4,7 @@
 ## OpenSearch
 
 For the opensearch Helm values, see 'opensearch-values.yaml'
-```
+```bash
 # Create ns for OpenSearch
 NS=tracing
 kubectl create ns $NS
@@ -25,7 +25,7 @@ helm upgrade --install opensearch opensearch/opensearch \
 
 ## Jaeger
 
-```
+```yaml
 # Create ns for OpenTel Operator
 NS=opentelemetry-operator-system
 kubectl create ns $NS
