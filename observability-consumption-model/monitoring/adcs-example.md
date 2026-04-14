@@ -1,6 +1,6 @@
 ## Cert-manager with ADCS Integration
 
-```
+```yaml
 ### 1. Prerequisites: Namespace & Credentials
 kubectl create ns adcs-issuer
 kubectl label --overwrite ns adcs-issuer pod-security.kubernetes.io/enforce=baseline
