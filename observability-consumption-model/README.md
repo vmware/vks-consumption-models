@@ -1,7 +1,7 @@
 # Observability on VKS
 
 This repository accompanies the **Observability on VKS** white paper:
-<white paper link tbc>
+https://www.vmware.com/docs/observability-vks
 
 It contains the example manifests, Helm values, and supporting configuration referenced throughout the paper, organized by topic:
 
