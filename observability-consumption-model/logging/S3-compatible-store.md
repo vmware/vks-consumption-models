@@ -1,6 +1,6 @@
 ## S3 Compatible Store (MinIO)
 
-```
+```yaml
 # Add MinIO Helm chart
 # Note: MinIO charts (charts.min.io) are being 
 # replaced by helm.min.io which use Alstor
