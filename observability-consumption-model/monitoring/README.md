@@ -1,7 +1,7 @@
 # Monitoring #
 
 ## Install kube-prometheus-stack
-```
+```bash
 # Add the Prometheus Community repo
 helm repo add prometheus-community \
   https://prometheus-community.github.io/helm-charts
@@ -17,7 +17,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 ```
 
 ## Optionally, Without Node Exporter
-```
+```bash
 # Create namespace with standard 'baseline' security
 kubectl create ns monitoring
 kubectl label --overwrite ns monitoring \
@@ -30,7 +30,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 ```
 
 ## Verify the Installation
-```
+```bash
 # Show running pods
 kubectl -n monitoring get pods -o custom-columns=NAME:.metadata.name,\
 STATUS:.status.phase,\
@@ -54,7 +54,7 @@ kubectl describe clusterrole prometheus-kube-prometheus-prometheus
 
 For an example of how to setup Active Directory Certificate Services, see 'adcs-example.md'
 
-```
+```yaml
 # Create ns for Istio ingress gw
 NS=istio-ingress
 kubectl create ns $NS
@@ -111,7 +111,7 @@ EOF
 ```
 
 ## HTTP Routes
-```
+```yaml
 kubectl apply -f - <<EOF
 # 1. Grafana Route -> Service Port 80
 apiVersion: gateway.networking.k8s.io/v1
@@ -180,7 +180,7 @@ EOF
 ```
 
 ## Verify the Gateway
-```
+```bash
 # Check for reconciliation and IP 
 kubectl -n istio-ingress get gateway monitoring-gateway
 
@@ -202,7 +202,7 @@ curl -ik \
 ```
 
 ## Deploy Prometheus Example app
-```
+```yaml
 # Create the application namespace & set permissions
 kubectl create ns my-app
 kubectl label --overwrite \
@@ -283,7 +283,7 @@ kubectl run -i --tty load-generator \
 
 
 ## Service Mesh Observability
-```
+```yaml
 # Ensure Istio system pods are running
 kubectl -n istio-system get pods | grep istio
 
@@ -343,7 +343,7 @@ kubectl exec -it -n my-app2 debug-sleeper -- \
 ## Integration with VCF Operations
 
 For Telegraf config, see 'telegraf-data-values.yaml'
-```
+```bash
 # Find the Telegraf package and namespace
 read -r NAMESPACE PKG_NAME <<< \
   $(kubectl get pkgi -A --no-headers | awk '/telegraf/{print $1, $2}')
@@ -359,7 +359,7 @@ vcf package installed update "$PKG_NAME" \
 For the workload generator, see 'critical-app.yaml'
 
 First, create a number of Ubuntu test VMs
-```
+```bash
 # Clone the Ubuntu image
 seq 1 10 | xargs -P0 -I {} govc vm.clone -vm ubuntu ubuntu-clone{}
 
