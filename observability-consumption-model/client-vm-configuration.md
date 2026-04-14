@@ -11,7 +11,7 @@ https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-0/buildin
 
 
 ## Install VCF Command Line
-```
+```bash
 # Download VCF CLI & install (version 9.0)
 curl -fsSL https://packages.broadcom.com/artifactory/vcf-distro\
   /vcf-cli/linux/amd64/v9.0.0/vcf-cli.tar.gz | tar xz
@@ -39,7 +39,7 @@ vcf context create --endpoint=<supervisor endpoint> \
 ```
 
 ## Install vCenter Certificate
-```
+```bash
 # Get vCenter certs & install
 # Download the zip file to /tmp using curl (insecure mode required)
 VCENTER_IP=<vCenter IP>
@@ -55,7 +55,7 @@ sudo update-ca-certificates
 ```
 
 ## Install kubectl
-```
+```bash
 sudo apt update
 sudo apt install -y kubectl
 
@@ -71,7 +71,7 @@ source ~/.bashrc
 ```
 
 ## Install Helm. See https://helm.sh/docs/intro/install/
-```
+```bash
 # Get Helm using download script
 curl -fsSL -o /tmp/get_helm.sh \
   https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4
