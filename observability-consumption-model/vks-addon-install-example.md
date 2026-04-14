@@ -6,7 +6,7 @@ https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vsphere-supervisor-services-a
 VKS Istio package reference:
 https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vsphere-supervisor-services-and-standalone-components/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/installing-standard-packages-on-tkg-service-clusters/standard-package-reference/istio-package-reference.html
 
-```
+```bash
 # Change context to the Supervisor context, for example:
 vcf context use supervisor-namespace
 
