@@ -3,7 +3,7 @@
 ## Install Loki
 
 See the 'loki-values.yaml' for the Loki Helm chart values
-```
+```bash
 # Add Grafana charts repo
 helm repo add grafana https://grafana.github.io/helm-charts
 
@@ -19,7 +19,7 @@ helm upgrade --install loki grafana/loki \
 Package reference
 https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vsphere-supervisor-services-and-standalone-components/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/installing-standard-packages-on-tkg-service-clusters/standard-package-reference/fluent-bit-package-reference.html
 
-```
+```bash
 # Confirm fluent-bit package is installed
 kubectl -n vmware-system-tkg describe \
   $(kubectl get pkgi -A -o name | grep fluent-bit) | grep -A5 'Status'
