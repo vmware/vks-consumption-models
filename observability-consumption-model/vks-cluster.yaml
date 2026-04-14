@@ -1,0 +1,49 @@
+# vks-cluster.yaml
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: kubernetes-cluster-kmnr
+  namespace: supervisor-namespace
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 192.168.156.0/20
+    services:
+      cidrBlocks:
+        - 10.96.0.0/12
+    serviceDomain: cluster.local
+  topology:
+    class: builtin-generic-v3.4.0
+    version: v1.33.3---vmware.1-fips-vkr.1
+    variables:
+      - name: kubernetes
+        value:
+          certificateRotation:
+            enabled: true
+            renewalDaysBeforeExpiry: 90
+      - name: vmClass
+        value: guaranteed-large
+      - name: storageClass
+        value: vsan-esa-default-policy-raid5
+    controlPlane:
+      replicas: 3
+      metadata:
+        annotations:
+          run.tanzu.vmware.com/resolve-os-image: os-name=photon
+    workers:
+      machineDeployments:
+        - class: node-pool
+          name: kubernetes-cluster-kmnr-nodepool-nve9
+          replicas: 3
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=photon
+          variables:
+            overrides:
+              - name: volumes
+                value:
+                  - name: vol-5be3
+                    mountPath: /var/lib/containerd
+                    storageClass: vsan-esa-default-policy-raid5
+                    capacity: 800Gi
