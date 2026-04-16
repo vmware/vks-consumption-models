@@ -8,7 +8,7 @@ kubectl label --overwrite ns adcs-issuer pod-security.kubernetes.io/enforce=base
 # Create secret containing user/pass for windows CA
 # Ensure account has the correct rights to 'enroll' certificates (see below)
 kubectl -n adcs-issuer create secret generic adcs-issuer-credentials \
-  --from-literal=username='showcase\[your username]' \
+  --from-literal=username='domain\[your username]' \
   --from-literal=password='[your password]'
 
 ### 2. Install the ADCS Issuer Webhook
