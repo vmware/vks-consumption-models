@@ -1,4 +1,4 @@
-# Observability on VKS
+# Observability on VMware vSphere Kubernetes Service
 
 This repository accompanies the **Observability on VKS** white paper:
 https://www.vmware.com/docs/observability-vks
