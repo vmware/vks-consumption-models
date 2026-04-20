@@ -4,6 +4,9 @@ This repository provides a complete framework for deploying and managing the **G
 
 It demonstrates a robust enterprise CI/CD pattern using **GitLab** for orchestration and **Argo CD** for GitOps.
 
+For the related Whitepaper, vist:
+https://www.vmware.com/docs/ci-cd-vks
+
 ---
 
 ## System Architecture
