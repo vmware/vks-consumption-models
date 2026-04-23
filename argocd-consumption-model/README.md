@@ -1,4 +1,4 @@
-# Argo CD Consumption Model: End-to-End GitOps on VKS
+# Argo CD Consumption Model: End-to-End GitOps for Applications on VKS
 
 This repository provides a complete framework for deploying and managing the **Google Microservices Demo** (Online Boutique) on **vSphere Kubernetes Service (VKS)**. 
 
