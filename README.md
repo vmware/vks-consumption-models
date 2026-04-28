@@ -19,4 +19,4 @@ The currently available Consumption Models are:
 * Continuous Integration and Delivery for applications with Harness
 * Continuous Integration and Delivery for applications with ArgoCD
 * Lifecycle management of VKS and AddOn Packages with ArgoCD
-* Observability with Prometheus and Grafana opensource operators
+* Observability (metrics, logs, traces) using Prometheus Community Stack, Fluent Bit, Loki, OpenTel and Jaeger; with VCF Operations/Operations for Logs providing infra context
