@@ -18,5 +18,5 @@ The Consumption Models below are examples of how Developers and Platform Enginee
 The currently available Consumption Models are:
 * Continuous Integration and Delivery for applications with Harness
 * Continuous Integration and Delivery for applications with ArgoCD
-* Lifecycle management of VKS and AddOn Packages with ArgoCD
+* VKS Cluster and Add-On Management with the Argo CD Supervisor Service
 * Observability (metrics, logs, traces) using Prometheus Community Stack, Fluent Bit, Loki, OpenTel and Jaeger; with VCF Operations/Operations for Logs providing infra context
