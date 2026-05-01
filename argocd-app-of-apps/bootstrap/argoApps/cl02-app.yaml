@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cl02
+  annotations:
+    argocd.argoproj.io/sync-wave: "12"  
+  namespace: argocd-instance-1
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/skandpurohit/vks-gitops.git
+    path: clusters/cl02
+    targetRevision: main
+  destination:
+    name: sp-lab-supervisor
+    namespace: workload-ns
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

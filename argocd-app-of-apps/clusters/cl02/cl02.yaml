@@ -1,0 +1,70 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+#define the cluster
+metadata:
+  #user-defined name of the cluster; string
+  name: cl02
+  #kubernetes namespace for the cluster; string
+  namespace: workload-ns
+#define the desired state of cluster
+spec:
+  #specify the cluster network; required, there is no default
+  clusterNetwork:
+    #network ranges from which service VIPs are allocated
+    services:
+      #ranges of network addresses; string array
+      #CAUTION: must not overlap with Supervisor
+      cidrBlocks: ["10.96.0.0/12"]
+    #network ranges from which Pod networks are allocated
+    pods:
+      #ranges of network addresses; string array
+      #CAUTION: must not overlap with Supervisor
+      cidrBlocks: ["192.168.0.0/16"]
+    #domain name for services; string
+    serviceDomain: "cluster.local"
+  #specify the topology for the cluster
+  topology:
+    #name of the ClusterClass object to derive the topology
+    classRef:
+      name: builtin-generic-v3.6.0
+      namespace: vmware-system-vks-public 
+    #kubernetes version of the cluster; format is KR NAME
+    version: v1.35.0---vmware.2-vkr.4
+    #describe the cluster control plane
+    controlPlane:
+      #number of control plane nodes
+      #integer value 1 or 3
+      #NOTE: Production clusters require 3 control plane nodes
+      replicas: 1
+    #describe the cluster worker nodes
+    workers:
+      #specifies parameters for a set of worker nodes in the topology
+      machineDeployments:
+        #node pool class used to create the set of worker nodes
+        - class: node-pool
+          #user-defined name of the node pool; string
+          name: node-pool-1
+          #number of worker nodes in this pool; integer 0 or more
+          metadata:
+            annotations:
+              cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3" # Set required annotations for ClusterAutoscaler
+              cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+          #enabling auto-scalar
+          #metadata:
+           # annotations:
+            #  cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "2" # Set required annotations for ClusterAutoscaler
+             # cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "0"
+    #customize the cluster
+    variables:
+      #virtual machine class type and size for cluster nodes
+      - name: vmClass
+        value: best-effort-medium
+      - name: bootstrapAddons
+        value:
+          cniRef:
+            name: antrea
+            namespace: vmware-system-vks-public
+      #persistent storage class for cluster nodes
+      - name: storageClass
+        value: vsan-esa-default-policy-raid5
+

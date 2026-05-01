@@ -1,0 +1,12 @@
+apiVersion: field.vmware.com/v1
+kind: ArgoNamespace
+metadata:
+  name: workload-ns
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  serviceAccount: "" # optionally add an existing service account name
+  argoNamespace: "argocd-instance-1"
+  clusterLabels:
+    test: "test"
+  project: default

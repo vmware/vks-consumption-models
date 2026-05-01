@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vks-gitops-root
+  namespace: argocd-instance-1
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/skandpurohit/vks-gitops.git
+    path: bootstrap
+    targetRevision: main
+    directory:
+      recurse: true
+  destination:
+    name: sp-lab-supervisor
+    namespace: argocd-instance-1
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

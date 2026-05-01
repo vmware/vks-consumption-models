@@ -1,0 +1,12 @@
+apiVersion: addons.kubernetes.vmware.com/v1alpha1
+kind: AddonInstall
+metadata:
+  name: cl01-cert-manager
+  namespace: workload-ns
+spec:
+  addonRef:
+    name: cert-manager
+  clusters:
+  - selector:
+      matchLabels:
+        cluster.x-k8s.io/cluster-name: cl01

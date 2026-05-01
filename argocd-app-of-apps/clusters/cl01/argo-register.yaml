@@ -1,0 +1,12 @@
+apiVersion: field.vmware.com/v1
+kind: ArgoCluster
+metadata:
+  name: cl01
+  namespace: workload-ns
+spec:
+  clusterName: "cl01"
+  argoNamespace: "argocd-instance-1"
+  clusterLabels:
+    env: "lab"
+    team: "platform"
+  project: default

@@ -1,0 +1,12 @@
+apiVersion: addons.kubernetes.vmware.com/v1alpha1
+kind: AddonInstall
+metadata:
+  name: cl01-prometheus
+  namespace: workload-ns
+spec:
+  addonRef:
+    name: prometheus
+  clusters:
+  - selector:
+      matchLabels:
+        cluster.x-k8s.io/cluster-name: cl01
