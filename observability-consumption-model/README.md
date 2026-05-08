@@ -64,6 +64,13 @@ These examples are intended to accompany the reference implementation described 
 - registry locations
 - infrastructure endpoints
 
+## References
+* [vSphere Supervisor Platform](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-0/vsphere-supervisor-installation-and-configuration.html)
+* [Command line tool (kubectl)](https://kubernetes.io/docs/reference/kubectl/)
+* [Installing and Using VCF CLI v9.0](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-9-0-and-later/9-0/building-your-cloud-applications/getting-started-with-the-tools-for-building-applications/installing-and-using-vcf-cli-v9.html)
+* [Managing Add-ons in VKS](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vsphere-supervisor-services-and-standalone-components/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/managing-add-ons-in-vks-clusters.html)
+* [VKS Standard Package Reference](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vsphere-supervisor-services-and-standalone-components/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/installing-standard-packages-on-tkg-service-clusters/standard-package-reference.html)
+
 ## Purpose
 
 The goal of this repository is to make the configuration artifacts from the paper easier to review, reuse, and adapt, while keeping the structure aligned to the core observability domains of **metrics**, **logging**, and **tracing**.
