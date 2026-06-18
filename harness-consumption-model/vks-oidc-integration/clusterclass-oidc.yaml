@@ -1,0 +1,103 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: ClusterClass
+metadata:
+  name: custom-v3.4.0-external-oidc
+  namespace: vmware-system-vks-public
+spec:
+  controlPlane:
+    machineHealthCheck:
+      maxUnhealthy: 100%
+      nodeStartupTimeout: 2h0m0s
+      unhealthyConditions:
+      - status: Unknown
+        timeout: 5m0s
+        type: Ready
+      - status: "False"
+        timeout: 12m0s
+        type: Ready
+    machineInfrastructure:
+      ref:
+        apiVersion: vmware.infrastructure.cluster.x-k8s.io/v1beta1
+        kind: VSphereMachineTemplate
+        name: tkc-control-plane-v3.4.0
+        namespace: vmware-system-vks-public
+    metadata:
+      annotations:
+        run.tanzu.vmware.com/resolve-os-image: os-name=photon
+    ref:
+      apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+      kind: KubeadmControlPlaneTemplate
+      name: tkc-control-plane-v3.4.0
+      namespace: vmware-system-vks-public
+  infrastructure:
+    ref:
+      apiVersion: vmware.infrastructure.cluster.x-k8s.io/v1beta1
+      kind: VSphereClusterTemplate
+      name: tkc-infrastructure-v3.4.0
+      namespace: vmware-system-vks-public
+  workers:
+    machineDeployments:
+    - class: node-pool
+      machineHealthCheck:
+        maxUnhealthy: 100%
+        nodeStartupTimeout: 2h0m0s
+        unhealthyConditions:
+        - status: Unknown
+          timeout: 5m0s
+          type: Ready
+        - status: "False"
+          timeout: 12m0s
+          type: Ready
+      template:
+        bootstrap:
+          ref:
+            apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+            kind: KubeadmConfigTemplate
+            name: tkc-md-v3.4.0
+            namespace: vmware-system-vks-public
+        infrastructure:
+          ref:
+            apiVersion: vmware.infrastructure.cluster.x-k8s.io/v1beta1
+            kind: VSphereMachineTemplate
+            name: tkc-md-v3.4.0
+            namespace: vmware-system-vks-public
+        metadata: {}
+  patches:
+  - external:
+      discoverVariablesExtension: discover-variables.runtime-extension
+      generateExtension: generate-patches.runtime-extension
+      settings:
+        version: v3.4.0
+    name: default
+  - definitions:
+    - jsonPatches:
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/files/-
+        valueFrom:
+          template: |
+            path: /etc/kubernetes/authentication-config.yaml
+            owner: root:root
+            permissions: "0600"
+            contentFrom:
+              secret:
+                name: {{ .builtin.cluster.name }}-authentication-config
+                key: authentication-config.yaml
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/clusterConfiguration/apiServer/extraVolumes/-
+        value:
+          hostPath: /etc/kubernetes/authentication-config.yaml
+          mountPath: /etc/kubernetes/authentication-config.yaml
+          name: authentication-config
+          pathType: File
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/clusterConfiguration/apiServer/extraArgs/authentication-config
+        value: /etc/kubernetes/authentication-config.yaml
+      selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+    description: Mount OIDC AuthenticationConfiguration from Secret
+    name: oidc-authentication-config
+

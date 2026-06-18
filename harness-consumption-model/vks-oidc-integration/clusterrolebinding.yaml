@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: harness-m2m-admin-binding
+subjects:
+- kind: Group
+  name: "keycloak-group:default-roles-vks-realm"  # Combines your prefix + Keycloak default role
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin                              # Grants full cluster access to the pipeline
+  apiGroup: rbac.authorization.k8s.io
+
