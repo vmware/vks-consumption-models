@@ -8,7 +8,7 @@ This OIDC integration adopts zero-trust principles by replacing static credentia
 ## High-Level Authentication Workflow
 In this architecture, the Harness Delegate acts as the OIDC client. It requests an OIDC token from your Keycloak provider, which the VKS control plane trusts. Upon successful validation of this token, the VKS cluster grants the Harness Delegate the necessary permissions based on the RBAC roles bound to the authenticated user group.
 
-![Architectural Diagram: architecture-diagram](architecture-diagram.png)
+![Architectural Diagram](architecture-diagram.png)
 
 ## Prerequisites
 
@@ -85,7 +85,7 @@ To configure this connector via the Harness UI, after selecting the right projec
 * OIDC Scopes: Add groups and profile
 * Delegate Selectors: helm-delegate-irsa
 
-![Harness Connector: harness-connector](harness-connector.png)
+![Harness Connector](harness-connector.png)
 
 
 > **Note:**  In this example, the helm-delegate-irsa delegate is running in Cluster A. You can obtain the Master URL (e.g., https://192.168.22.17:6443) from the workload.kubeconfig file generated in Step 4
