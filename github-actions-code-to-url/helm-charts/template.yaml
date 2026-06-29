@@ -1,0 +1,123 @@
+---
+# Source: todo-app/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-name-todo-app
+  labels:
+    helm.sh/chart: todo-app-0.1.0
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+automountServiceAccountToken: true
+---
+# Source: todo-app/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  # Using the helper is standard practice
+  name: release-name-todo-app-auth
+  labels:
+    helm.sh/chart: todo-app-0.1.0
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  todo-password: "Vk13YXJlMSE="
+---
+# Source: todo-app/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-todo-app
+  labels:
+    helm.sh/chart: todo-app-0.1.0
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 7540
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/instance: release-name
+---
+# Source: todo-app/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-todo-app
+  labels:
+    helm.sh/chart: todo-app-0.1.0
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: todo-app
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: todo-app-0.1.0
+        app.kubernetes.io/name: todo-app
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/version: "1.16.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: release-name-todo-app
+      containers:
+        - name: todo-app
+          image: "quay.io/rahulk10/todo:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 7540
+              protocol: TCP
+          env:
+            - name: TODO_PASSWORD
+              #value: VMware1!
+              valuesFrom:
+                secretKeyRef:
+                  name: release-name-todo-app-auth
+                  key: todopassword
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+---
+# Source: todo-app/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "release-name-todo-app-test-connection"
+  labels:
+    helm.sh/chart: todo-app-0.1.0
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['release-name-todo-app:80']
+  restartPolicy: Never

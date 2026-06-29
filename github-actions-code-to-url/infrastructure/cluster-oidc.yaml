@@ -1,0 +1,70 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: github-test-cluster
+  namespace: test-namespace # Your vSphere namespace
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+    serviceDomain: cluster.local
+    services:
+      cidrBlocks:
+      - 198.51.100.0/12
+  topology:
+    #classRef:
+    #kind: ClusterClass
+    class : custom-v3.4.0-external-oidc
+      #namespace: vmware-system-vks-public
+    controlPlane:
+      replicas: 1
+    variables:
+    - name: storageClass
+      value: vsan-default-storage-policy
+    - name: vmClass
+      value: best-effort-medium
+    - name: kubernetes
+      value:
+        certificateRotation:
+          enabled: true
+          renewalDaysBeforeExpiry: 90
+        security:
+          podSecurityStandard:
+            audit: privileged
+            auditVersion: latest
+            deactivated: false
+            enforce: privileged
+            enforceVersion: latest
+            warn: privileged
+            warnVersion: latest
+    - name: vsphereOptions
+      value:
+        persistentVolumes:
+          availableStorageClasses:
+          - vsan-default-storage-policy
+          defaultStorageClass: vsan-default-storage-policy
+    - name: osConfiguration
+      value:
+        ntp:
+          servers:
+          - time.google.com
+        sshd:
+          banner: '---AUTHORIZED ACCESS ONLY--- Use of this system is restricted to
+            authorized users for authorized activities only. '
+    version: v1.33.3---vmware.1-fips-vkr.1
+    workers:
+      machineDeployments:
+        - class: node-pool
+          name: np01
+          replicas: 2
+          variables:
+            overrides:
+            - name: volumes
+              value:
+              - capacity: 40Gi
+                mountPath: /var/lib/containerd
+                name: containerd
+                storageClass: vsan-default-storage-policy
+            - name: vmClass
+              value: best-effort-large

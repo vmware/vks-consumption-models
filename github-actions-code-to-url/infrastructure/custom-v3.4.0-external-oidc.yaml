@@ -1,0 +1,107 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: ClusterClass
+metadata:
+  name: custom-v3.4.0-external-oidc
+  namespace: test-namespace
+spec:
+  controlPlane:
+    machineHealthCheck:
+      maxUnhealthy: 100%
+      nodeStartupTimeout: 2h0m0s
+      unhealthyConditions:
+      - status: Unknown
+        timeout: 5m0s
+        type: Ready
+      - status: "False"
+        timeout: 12m0s
+        type: Ready
+    machineInfrastructure:
+      ref:
+        apiVersion: vmware.infrastructure.cluster.x-k8s.io/v1beta1
+        kind: VSphereMachineTemplate
+        name: tkc-control-plane-v3.4.0
+        namespace: test-namespace
+    metadata:
+      annotations:
+        run.tanzu.vmware.com/resolve-os-image: os-name=photon
+    ref:
+      apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+      kind: KubeadmControlPlaneTemplate
+      name: tkc-control-plane-v3.4.0
+      namespace: test-namespace
+  infrastructure:
+    ref:
+      apiVersion: vmware.infrastructure.cluster.x-k8s.io/v1beta1
+      kind: VSphereClusterTemplate
+      name: tkc-infrastructure-v3.4.0
+      namespace: test-namespace
+  workers:
+    machineDeployments:
+    - class: node-pool
+      machineHealthCheck:
+        maxUnhealthy: 100%
+        nodeStartupTimeout: 2h0m0s
+        unhealthyConditions:
+        - status: Unknown
+          timeout: 5m0s
+          type: Ready
+        - status: "False"
+          timeout: 12m0s
+          type: Ready
+      template:
+        bootstrap:
+          ref:
+            apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+            kind: KubeadmConfigTemplate
+            name: tkc-md-v3.4.0
+            namespace: test-namespace
+        infrastructure:
+          ref:
+            apiVersion: vmware.infrastructure.cluster.x-k8s.io/v1beta1
+            kind: VSphereMachineTemplate
+            name: tkc-md-v3.4.0
+            namespace: test-namespace
+  patches:
+  - external:
+      discoverVariablesExtension: discover-variables.runtime-extension
+      generateExtension: generate-patches.runtime-extension
+      settings:
+        version: v3.4.0
+    name: default
+# OIDC-specific patches applied on top of the defaults
+  - name: oidc-authentication-config
+    description: Mount OIDC AuthenticationConfiguration from Secret
+    definitions:
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      # Patch 1: Inject file into control plane node
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/files/-
+        valueFrom:
+          template: |
+            path: /etc/kubernetes/authentication-config.yaml
+            owner: root:root
+            permissions: "0600"
+            contentFrom:
+              secret:
+                name: {{ .builtin.cluster.name }}-authentication-config
+                key: authentication-config.yaml
+      # Patch 2: Mount file into API server static pod
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/clusterConfiguration/apiServer/extraVolumes/-
+        value:
+          name: authentication-config
+          hostPath: /etc/kubernetes/authentication-config.yaml
+          mountPath: /etc/kubernetes/authentication-config.yaml
+          pathType: File
+          readOnly: true
+      # Patch 3: Set API server flag
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/clusterConfiguration/apiServer/extraArgs/authentication-config
+          #value:
+          #name: authentication-config
+        value: /etc/kubernetes/authentication-config.yaml
