@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: app-gateway-pr-${PR_NUMBER}
+  namespace: default
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "${PR_NUMBER}.sfo.rainpole.io"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: app-virtualservice-pr-${PR_NUMBER}
+  namespace: default
+spec:
+  hosts:
+  - "${PR_NUMBER}.sfo.rainpole.io"
+  gateways:
+  - app-gateway-pr-${PR_NUMBER}
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: todo-app.default.svc.cluster.local 
+        port:
+          number: 80

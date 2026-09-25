@@ -1,0 +1,158 @@
+Name:             release-94244f-todo-app-748c8fbb44-2z58v
+Namespace:        todo-app
+Priority:         0
+Service Account:  login-sa
+Node:             workload-vsphere-vks1-node-pool-1-5td8p-d9lc5-9llrf/172.30.0.37
+Start Time:       Sun, 16 Aug 2026 23:21:28 +0000
+Labels:           app.kubernetes.io/instance=release-94244f
+                  app.kubernetes.io/managed-by=Helm
+                  app.kubernetes.io/name=todo-app
+                  app.kubernetes.io/version=1.16.0
+                  harness.io/release-name=release-94244f
+                  helm.sh/chart=todo-app-0.1.0
+                  pod-template-hash=748c8fbb44
+                  topology.kubernetes.io/zone=zone-1
+Annotations:      vault.hashicorp.com/agent-inject: true
+                  vault.hashicorp.com/agent-inject-secret-config.txt: secret/data/ns01/login-secret
+                  vault.hashicorp.com/agent-inject-status: injected
+                  vault.hashicorp.com/auth-path: auth/kubernetes-w01-sup_ns01-workload-vsphere-vks1
+                  vault.hashicorp.com/role: w01-sup_ns01-workload-vsphere-vks1
+Status:           Pending
+IP:               240.0.3.32
+IPs:
+  IP:           240.0.3.32
+Controlled By:  ReplicaSet/release-94244f-todo-app-748c8fbb44
+Init Containers:
+  vault-agent-init:
+    Container ID:  containerd://874a051f9abd0e63a242875bc5a3404479f5002b5a51b56a754dc2b374265a9f
+    Image:         projects.packages.broadcom.com/vsphere/iaas/secret-store-service/9.1.0.0100/secret-store-service@sha256:c5f1a7f8c9f3dca295e39c0af92f00d38b29e48ea1ef1bffd66ce5058ddd9840
+    Image ID:      projects.packages.broadcom.com/vsphere/iaas/secret-store-service/9.1.0.0100/secret-store-service@sha256:c5f1a7f8c9f3dca295e39c0af92f00d38b29e48ea1ef1bffd66ce5058ddd9840
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /bin/sh
+      -ec
+    Args:
+      echo ${VAULT_CONFIG?} | base64 -d > /home/vault/config.json && vault agent -config=/home/vault/config.json
+    State:          Running
+      Started:      Sun, 16 Aug 2026 23:21:31 +0000
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  128Mi
+    Requests:
+      cpu:     250m
+      memory:  64Mi
+    Environment:
+      NAMESPACE:         todo-app (v1:metadata.namespace)
+      HOST_IP:            (v1:status.hostIP)
+      POD_IP:             (v1:status.podIP)
+      VAULT_LOG_LEVEL:   info
+      VAULT_LOG_FORMAT:  standard
+      VAULT_CONFIG:      eyJhdXRvX2F1dGgiOnsibWV0aG9kIjp7InR5cGUiOiJrdWJlcm5ldGVzIiwibW91bnRfcGF0aCI6ImF1dGgva3ViZXJuZXRlcy13MDEtc3VwX25zMDEtd29ya2xvYWQtdnNwaGVyZS12a3MxIiwiY29uZmlnIjp7InJvbGUiOiJ3MDEtc3VwX25zMDEtd29ya2xvYWQtdnNwaGVyZS12a3MxIiwidG9rZW5fcGF0aCI6Ii92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC90b2tlbiJ9fSwic2luayI6W3sidHlwZSI6ImZpbGUiLCJjb25maWciOnsicGF0aCI6Ii9ob21lL3ZhdWx0Ly52YXVsdC10b2tlbiJ9fV19LCJleGl0X2FmdGVyX2F1dGgiOnRydWUsInBpZF9maWxlIjoiL2hvbWUvdmF1bHQvLnBpZCIsInZhdWx0Ijp7ImFkZHJlc3MiOiJodHRwczovL3NlY3JldC1zdG9yZS1zZXJ2aWNlLnZrcy12YXVsdC1pbmplY3Rvci5zdmMuY2x1c3Rlci5sb2NhbDo4MjAwIn0sInRlbXBsYXRlIjpbeyJkZXN0aW5hdGlvbiI6Ii92YXVsdC9zZWNyZXRzL2NvbmZpZy50eHQiLCJjb250ZW50cyI6Int7IHdpdGggc2VjcmV0IFwic2VjcmV0L2RhdGEvbnMwMS9sb2dpbi1zZWNyZXRcIiB9fXt7IHJhbmdlICRrLCAkdiA6PSAuRGF0YSB9fXt7ICRrIH19OiB7eyAkdiB9fVxue3sgZW5kIH19e3sgZW5kIH19IiwibGVmdF9kZWxpbWl0ZXIiOiJ7eyIsInJpZ2h0X2RlbGltaXRlciI6In19In1dLCJ0ZW1wbGF0ZV9jb25maWciOnsiZXhpdF9vbl9yZXRyeV9mYWlsdXJlIjp0cnVlfX0=
+    Mounts:
+      /home/vault from home-init (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-v26r5 (ro)
+      /vault/secrets from vault-secrets (rw)
+Containers:
+  todo-app:
+    Container ID:
+    Image:          design-libraries-docker-dev-local.packages.vcfd.broadcom.net/todoservice:qDTjUgniQf22CuVQgIyO5g
+    Image ID:
+    Port:           7540/TCP (http)
+    Host Port:      0/TCP (http)
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Liveness:       http-get http://:http/ delay=0s timeout=1s period=10s #success=1 #failure=3
+    Readiness:      http-get http://:http/ delay=0s timeout=1s period=10s #success=1 #failure=3
+    Environment:
+      TODO_PASSWORD:  <set to the key 'todopassword' in secret 'release-94244f-todo-app-auth-15'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-v26r5 (ro)
+      /vault/secrets from vault-secrets (rw)
+  vault-agent:
+    Container ID:
+    Image:         projects.packages.broadcom.com/vsphere/iaas/secret-store-service/9.1.0.0100/secret-store-service@sha256:c5f1a7f8c9f3dca295e39c0af92f00d38b29e48ea1ef1bffd66ce5058ddd9840
+    Image ID:
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /bin/sh
+      -ec
+    Args:
+      echo ${VAULT_CONFIG?} | base64 -d > /home/vault/config.json && vault agent -config=/home/vault/config.json
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  128Mi
+    Requests:
+      cpu:     250m
+      memory:  64Mi
+    Environment:
+      NAMESPACE:         todo-app (v1:metadata.namespace)
+      HOST_IP:            (v1:status.hostIP)
+      POD_IP:             (v1:status.podIP)
+      VAULT_LOG_LEVEL:   info
+      VAULT_LOG_FORMAT:  standard
+      VAULT_CONFIG:      eyJhdXRvX2F1dGgiOnsibWV0aG9kIjp7InR5cGUiOiJrdWJlcm5ldGVzIiwibW91bnRfcGF0aCI6ImF1dGgva3ViZXJuZXRlcy13MDEtc3VwX25zMDEtd29ya2xvYWQtdnNwaGVyZS12a3MxIiwiY29uZmlnIjp7InJvbGUiOiJ3MDEtc3VwX25zMDEtd29ya2xvYWQtdnNwaGVyZS12a3MxIiwidG9rZW5fcGF0aCI6Ii92YXIvcnVuL3NlY3JldHMva3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC90b2tlbiJ9fSwic2luayI6W3sidHlwZSI6ImZpbGUiLCJjb25maWciOnsicGF0aCI6Ii9ob21lL3ZhdWx0Ly52YXVsdC10b2tlbiJ9fV19LCJleGl0X2FmdGVyX2F1dGgiOmZhbHNlLCJwaWRfZmlsZSI6Ii9ob21lL3ZhdWx0Ly5waWQiLCJ2YXVsdCI6eyJhZGRyZXNzIjoiaHR0cHM6Ly9zZWNyZXQtc3RvcmUtc2VydmljZS52a3MtdmF1bHQtaW5qZWN0b3Iuc3ZjLmNsdXN0ZXIubG9jYWw6ODIwMCJ9LCJ0ZW1wbGF0ZSI6W3siZGVzdGluYXRpb24iOiIvdmF1bHQvc2VjcmV0cy9jb25maWcudHh0IiwiY29udGVudHMiOiJ7eyB3aXRoIHNlY3JldCBcInNlY3JldC9kYXRhL25zMDEvbG9naW4tc2VjcmV0XCIgfX17eyByYW5nZSAkaywgJHYgOj0gLkRhdGEgfX17eyAkayB9fToge3sgJHYgfX1cbnt7IGVuZCB9fXt7IGVuZCB9fSIsImxlZnRfZGVsaW1pdGVyIjoie3siLCJyaWdodF9kZWxpbWl0ZXIiOiJ9fSJ9XSwidGVtcGxhdGVfY29uZmlnIjp7ImV4aXRfb25fcmV0cnlfZmFpbHVyZSI6dHJ1ZX19
+    Mounts:
+      /home/vault from home-sidecar (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-v26r5 (ro)
+      /vault/secrets from vault-secrets (rw)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True
+  Initialized                 False
+  Ready                       False
+  ContainersReady             False
+  PodScheduled                True
+Volumes:
+  kube-api-access-v26r5:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+  home-init:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     Memory
+    SizeLimit:  <unset>
+  home-sidecar:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     Memory
+    SizeLimit:  <unset>
+  vault-secrets:
+    Type:        EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:      Memory
+    SizeLimit:   <unset>
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  3m44s  default-scheduler  Successfully assigned todo-app/release-94244f-todo-app-748c8fbb44-2z58v to workload-vsphere-vks1-node-pool-1-5td8p-d9lc5-9llrf
+  Normal  Pulled     3m42s  kubelet            spec.initContainers{vault-agent-init}: Container image "projects.packages.broadcom.com/vsphere/iaas/secret-store-service/9.1.0.0100/secret-store-service@sha256:c5f1a7f8c9f3dca295e39c0af92f00d38b29e48ea1ef1bffd66ce5058ddd9840" already present on machine and can be accessed by the pod
+  Normal  Created    3m41s  kubelet            spec.initContainers{vault-agent-init}: Container created
+  Normal  Started    3m41s  kubelet            spec.initContainers{vault-agent-init}: Container started
+
+
+
+
+## vault-agent-init container logs
+
+2026-08-17T00:57:40.499Z [ERROR] agent.auth.handler: error authenticating: error="Put \"https://secret-store-service.vks-vault-injector.svc.cluster.local:8200/v1/auth/kubernetes-ns01-workload-vsphere-vks1/login\": dial tcp: lookup secret-store-service.vks-vault-injector.svc.cluster.local on 240.1.0.10:53: no such host" backoff=1m33.07s
+
+
+# deploy stage error
+
+Failed to fetch artifacts. Unable to fetch the given tag for the image. The tag provided for the image may be incorrect.. Unable to fetch the given tag for the image. The tag provided for the image may be incorrect.. Failed to fetch tags for image. Check if the image details are correct. Check if the image exists, the permissions are scoped for the authenticated user & check if the right connector chosen for fetching tags for the image. . Failed to fetch tags for image. Check if the image details are correct. Check if the image exists, the permissions are scoped for the authenticated user & check if the right connector chosen for fetching tags for the image. . Failed to fetch tags for image. Check if the image details are correct. Check if the image exists, the permissions are scoped for the authenticated user & check if the right connector chosen for fetching tags for the image. . Failed to fetch tags for image. Check if the image details are correct. Check if the image exists, the pe..truncated
+
+
