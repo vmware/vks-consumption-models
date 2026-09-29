@@ -1,0 +1,102 @@
+pipeline:
+  projectIdentifier: mymodernapp
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: spgithub
+        repoName: TravelPortal
+        build: <+input>
+        sparseCheckout: []
+  stages:
+    - stage:
+        name: Build and Push
+        identifier: Build_and_Push
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          buildIntelligence:
+            enabled: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: spk8sconnector
+              namespace: build
+              initTimeout: 1h
+              automountServiceAccountToken: false
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: BuildAndPushDockerRegistry_1
+                  identifier: BuildAndPushDockerRegistry_1
+                  spec:
+                    connectorRef: artifactorydockerconnector
+                    repo: design-libraries-docker-dev-local.artifactory.vcfd.broadcom.net/todoservice
+                    tags:
+                      - <+pipeline.executionId>
+                    caching: true
+                    dockerfile: ./Dockerfile
+                    context: ./
+    - stage:
+        name: Deployment
+        identifier: Deployment
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: spservice
+            serviceInputs:
+              serviceDefinition:
+                type: Kubernetes
+                spec:
+                  artifacts:
+                    primary:
+                      primaryArtifactRef: <+artifact.image>
+                      sources:
+                        - identifier: dockerImage
+                          type: DockerRegistry
+                          spec:
+                            connectorRef: artifactorydockerconnector
+                            image: design-libraries-docker-dev-local.artifactory.vcfd.broadcom.net/todoservice
+                            tag: <+pipeline.executionId>
+          environment:
+            environmentRef: spenv
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: spprodinfra
+          execution:
+            steps:
+              - step:
+                  name: Rollout Deployment
+                  identifier: rolloutDeployment
+                  type: K8sRollingDeploy
+                  timeout: 10m
+                  spec:
+                    skipDryRun: false
+                    pruningEnabled: false
+            rollbackSteps:
+              - step:
+                  name: Rollback Rollout Deployment
+                  identifier: rollbackRolloutDeployment
+                  type: K8sRollingRollback
+                  timeout: 10m
+                  spec:
+                    pruningEnabled: false
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+  identifier: exploredemo_Clone
+  name: explore-demo - Clone

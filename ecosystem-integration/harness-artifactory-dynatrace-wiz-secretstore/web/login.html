@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-size="normal">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>Travel Portal</title>
+        <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --font-family: "Raleway";
+                --portal-bg: #edf5ff;
+                --portal-deep: #0e2748;
+                --portal-mid: #174c79;
+                --portal-accent: #1da5a8;
+                --portal-accent-strong: #0b8d99;
+                --portal-white: #ffffff;
+                --portal-soft: #edf4fb;
+                --portal-border: rgba(14, 39, 72, 0.12);
+                --portal-text: #183153;
+                --portal-muted: #5b7088;
+                --portal-error: #d64545;
+            }
+        </style>
+        <link rel="stylesheet" href="/css/theme.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="/css/style.css" type="text/css" media="all" />
+    </head>
+    <body class="travel-login-body">
+        <div class="travel-login-shell">
+            <aside class="travel-login-spotlight">
+                <div class="travel-brand">
+                    <span class="travel-brand-mark">TP</span>
+                    <span>Travel Portal</span>
+                </div>
+
+                <p class="travel-kicker">Your next itinerary starts here</p>
+                <h1>Plan smarter trips with premium support, local insight, and seamless booking.</h1>
+
+                <ul class="travel-feature-list">
+                    <li>Curated weekend escapes and long-haul adventures</li>
+                    <li>24/7 concierge support for every itinerary</li>
+                    <li>Flexible plans designed around your pace</li>
+                </ul>
+            </aside>
+
+            <main class="travel-login-card">
+                <div class="travel-login-header">
+                    <p class="travel-kicker travel-kicker-dark">Welcome back</p>
+                    <h2>Sign in to Travel Portal</h2>
+                </div>
+
+                <form id="travel-login-form" class="travel-form" novalidate>
+                    <label class="travel-field" for="password">
+                        <span>Access password</span>
+                        <input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required />
+                    </label>
+
+                    <div class="travel-inline-row">
+                        <label class="travel-checkbox">
+                            <input id="show-password" type="checkbox" />
+                            <span>Show password</span>
+                        </label>
+                        <a href="#" class="travel-link">Need help?</a>
+                    </div>
+
+                    <button type="submit" class="travel-primary-btn">Access dashboard</button>
+                    <p id="login-error" class="travel-error" aria-live="polite"></p>
+                </form>
+
+                <div class="travel-login-footer">
+                    <span>Secure access</span>
+                    <strong>Travel Portal</strong>
+                </div>
+            </main>
+        </div>
+
+        <script>
+            const form = document.getElementById('travel-login-form');
+            const passwordInput = document.getElementById('password');
+            const showPassword = document.getElementById('show-password');
+            const errorBox = document.getElementById('login-error');
+
+            showPassword.addEventListener('change', function () {
+                passwordInput.type = this.checked ? 'text' : 'password';
+            });
+
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                errorBox.textContent = '';
+
+                const password = passwordInput.value.trim();
+                if (!password) {
+                    errorBox.textContent = 'Please enter your password.';
+                    passwordInput.focus();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/signin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ password })
+                    });
+
+                    const payload = await response.json().catch(() => ({}));
+                    if (!response.ok) {
+                        throw new Error(payload.message || 'Invalid password');
+                    }
+
+                    const expires = new Date(Date.now() + 8 * 60 * 60 * 1000).toUTCString();
+                    document.cookie = 'token=' + encodeURIComponent(payload.token) + '; expires=' + expires + '; path=/';
+                    window.location.href = '/';
+                } catch (error) {
+                    errorBox.textContent = error.message || 'Unable to sign in. Please try again.';
+                }
+            });
+        </script>
+    </body>
+</html>
