@@ -1,0 +1,89 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: github-test-cluster
+  namespace: test-namespace # Your vSphere namespace
+  labels:
+    addons.kubernetes.vmware.com/automated-monitoring: enabled
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 10.112.0.0/12
+    services:
+      cidrBlocks:
+        - 10.96.0.0/12
+    serviceDomain: cluster.local
+  topology:
+    classRef:
+      name: builtin-generic-v3.7.0
+      namespace: vmware-system-vks-public
+    version: v1.35.5---vmware.1-vkr.1
+    variables:
+      - name: vmClass
+        value: best-effort-medium
+      - name: storageClass
+        value: vsan-default-storage-policy
+      - name: vsphereOptions
+        value:
+          persistentVolumes:
+            availableStorageClasses:
+              - vsan-default-storage-policy
+            defaultStorageClass: vsan-default-storage-policy
+      - name: osConfiguration
+        value:
+          fips:
+            enabled: true
+          ntp:
+            servers:
+            - time.google.com
+          sshd:
+            banner: '---AUTHORIZED ACCESS ONLY--- Use of this system is restricted to
+              authorized users for authorized activities only. '
+      - name: bootstrapAddons
+        value:
+          cniRef:
+            name: antrea
+            namespace: vmware-system-vks-public
+ 
+      - name: kubernetes
+        value:
+          apiServerConfiguration:
+            extraAuthentication:
+              jwt:
+                - issuer:
+                    audiences:
+                    - "github-test-cluster"
+                    url: https://token.actions.githubusercontent.com
+                  claimMappings:
+                    username:
+                      claim: sub
+                      prefix: "github:"
+                    groups:
+                      groups:
+                      expression: "'github-org:' + claims.repository_owner"
+
+          certificateRotation:
+            enabled: true
+            renewalDaysBeforeExpiry: 90
+          security:
+            podSecurityStandard:
+              audit: privileged
+              auditVersion: latest
+              deactivated: false
+              enforce: privileged
+              enforceVersion: latest
+              warn: privileged
+              warnVersion: latest
+    controlPlane:
+      replicas: 1
+      metadata:
+    workers:
+      machineDeployments:
+        - class: node-pool
+          name: kubernetes-cluster-jlrg-np-qqsl
+          #replicas: 1
+          metadata:
+            annotations:
+              cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+              cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
